@@ -1,15 +1,13 @@
-# Use an official OpenJDK runtime as a parent image
-FROM openjdk:17-jdk-slim
+# syntax=docker/dockerfile:1
 
-# Set the working directory inside the container
+FROM gradle:8.7-jdk17 AS build
+WORKDIR /workspace
+COPY build.gradle settings.gradle* gradle.properties* ./
+COPY src ./src
+RUN gradle --no-daemon clean bootJar
+
+FROM eclipse-temurin:17-jre
 WORKDIR /app
-
-COPY build/libs/*.jar app.jar
-
-# Expose the port your application runs on
+COPY --from=build /workspace/build/libs/app.jar app.jar
 EXPOSE 8080
-
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.datasource.url=jdbc:mysql://shop-db.c74828wmikhx.ap-northeast-2.rds.amazonaws.com:3306/next?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8", "--spring.datasource.username=admin", "--spring.datasource.password=17Rwi[Cu*G[9*lGuXoWP)MFdyyVA"]
-
-
+ENTRYPOINT ["java","-jar","/app/app.jar"]

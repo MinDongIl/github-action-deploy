@@ -1,6 +1,0 @@
-[
-  {
-    "name": "jaden-server",
-    "imageUri": "077672914621.dkr.ecr.ap-northeast-2.amazonaws.com/jaden-server:<IMAGE_TAG>"
-  }
-]
