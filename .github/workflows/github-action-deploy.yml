@@ -1,4 +1,4 @@
-name: Deploy ECS (run.sh, static creds)
+name: Deploy ECS
 
 on:
   push:
@@ -29,19 +29,32 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Install deps
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y jq
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: ecr
 
-      - name: Login ECR
+      - name: Build and push image
         run: |
-          aws ecr get-login-password --region "$AWS_REGION" \
-          | docker login --username AWS --password-stdin "$(aws sts get-caller-identity --query 'Account' --output text).dkr.ecr.${AWS_REGION}.amazonaws.com"
+          IMAGE_TAG=${{ github.sha }}
+          ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
+          REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+          IMAGE="${REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+          echo "IMAGE=${IMAGE}" >> $GITHUB_ENV
 
-      - name: Run deploy script
-        run: |
-          chmod +x ./run.sh
-          ./run.sh
-        env:
-          GITHUB_SHA: ${{ github.sha }}
+          docker build -t "${IMAGE}" .
+          docker push "${IMAGE}"
+
+      - name: Render task definition
+        id: render
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ecs-task-def.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ env.IMAGE }}
+
+      - name: Deploy to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
