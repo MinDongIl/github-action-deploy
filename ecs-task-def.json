@@ -4,8 +4,8 @@
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "256",
   "memory": "512",
-  "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/ecsTaskExecutionRole",
-  "taskRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/ecsAppTaskRole",
+  "executionRoleArn": "arn:aws:iam::077672914621:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::077672914621:role/ecsAppTaskRole",
   "containerDefinitions": [
     {
       "name": "shop-api",
@@ -17,7 +17,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/next-shop",
+          "awslogs-group": "/ecs/shop-test",
           "awslogs-region": "ap-northeast-2",
           "awslogs-stream-prefix": "ecs"
         }
