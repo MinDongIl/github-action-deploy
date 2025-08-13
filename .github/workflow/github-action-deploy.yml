@@ -3,6 +3,9 @@ name: Deploy to ECS (Fargate)
 on:
   push:
     branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop", "main" ]
+  workflow_dispatch:
 
 permissions:
   id-token: write
