@@ -12,7 +12,7 @@
       "image": "dummy/will-be-overwritten:latest",
       "essential": true,
       "portMappings": [
-        { "containerPort": 8080, "protocol": "tcp" }
+        { "containerPort": 80, "protocol": "tcp" }
       ],
       "logConfiguration": {
         "logDriver": "awslogs",
@@ -22,7 +22,9 @@
           "awslogs-stream-prefix": "ecs"
         }
       },
-      "environment": []
+      "environment": [
+        { "name": "SERVER_PORT", "value": "80" }
+      ]
     }
   ]
 }
